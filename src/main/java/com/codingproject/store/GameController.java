@@ -9,9 +9,11 @@ import java.util.List;
 public class GameController {
 
     private final GameRepository repository;
+    private final DealService dealService;
 
-    public GameController(GameRepository repository) {
+    public GameController(GameRepository repository, DealService dealService) {
         this.repository = repository;
+        this.dealService = dealService;
     }
 
     @GetMapping
@@ -29,6 +31,12 @@ public class GameController {
     @GetMapping("/search")
     public List<Game> searchGames(@RequestParam String query){
         return repository.findByTitleContainingIgnoreCase(query);
+    }
+
+    //Live deal check using CheapShark
+    @GetMapping("/deal")
+    public DealDto getLiveDeal(@RequestParam String title){
+        return dealService.getBestDealForGame(title);
     }
 
     //Update both hours played and status
