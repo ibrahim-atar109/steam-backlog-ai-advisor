@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Steam Backlog & Deal Tracker</title>
+    <title>Steam Backlog & Library Tracker</title>
     <style>
         :root {
             --bg-color: #171a21;
@@ -14,6 +14,7 @@
             --btn-bg: #2a475e;
             --btn-hover: #417a9b;
             --deal-color: #ffaa00;
+            --success-color: #a4d007;
         }
 
         body {
@@ -33,10 +34,50 @@
             text-align: center;
             padding: 20px 0;
             border-bottom: 2px solid var(--btn-bg);
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
         h1 { color: var(--text-hover); margin: 0 0 10px 0; }
+
+        /* Navigation Tabs */
+        .tab-nav {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--btn-bg);
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .tab-btn.active {
+            background-color: var(--btn-bg);
+            color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        /* Library Stats Summary */
+        .stats-bar {
+            background-color: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 25px;
+            border: 1px solid #2a3f5a;
+        }
+
+        .stat-item { text-align: center; }
+        .stat-val { font-size: 22px; font-weight: bold; color: var(--accent-color); }
+        .stat-lbl { font-size: 12px; color: #8f98a0; text-transform: uppercase; }
 
         .controls-panel {
             background-color: var(--card-bg);
@@ -48,50 +89,36 @@
             align-items: center;
             justify-content: space-between;
             margin-bottom: 30px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
 
-        .search-group {
-            display: flex;
-            gap: 10px;
-            flex: 1;
-            min-width: 280px;
-        }
+        .search-group { display: flex; gap: 10px; flex: 1; min-width: 250px; }
 
-        input[type="text"], input[type="number"] {
+        input, select {
             background: #101822;
             border: 1px solid var(--btn-bg);
             color: white;
-            padding: 10px 15px;
+            padding: 8px 12px;
             border-radius: 4px;
             font-size: 14px;
-            width: 100%;
             outline: none;
-        }
-
-        input[type="text"]:focus, input[type="number"]:focus {
-            border-color: var(--accent-color);
         }
 
         button {
             background-color: var(--btn-bg);
             color: var(--accent-color);
             border: none;
-            padding: 10px 20px;
+            padding: 8px 16px;
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
-            transition: background 0.2s, color 0.2s;
+            transition: background 0.2s;
         }
 
-        button:hover {
-            background-color: var(--btn-hover);
-            color: var(--text-hover);
-        }
+        button:hover { background-color: var(--btn-hover); color: var(--text-hover); }
 
         .games-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
             gap: 20px;
         }
 
@@ -106,81 +133,77 @@
             border-left: 4px solid var(--accent-color);
         }
 
-        .game-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: var(--text-hover);
-            margin: 0 0 8px 0;
-        }
+        .game-title { font-size: 18px; font-weight: bold; color: var(--text-hover); margin-bottom: 5px; }
+        .game-dev { font-size: 13px; color: #8f98a0; margin-bottom: 15px; }
 
-        .game-dev {
-            font-size: 13px;
-            color: #8f98a0;
-            margin-bottom: 12px;
-        }
-
-        .game-details {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .library-controls {
             margin-top: 15px;
-            padding-top: 10px;
+            padding-top: 15px;
             border-top: 1px solid #2a3f5a;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
-        .game-price {
-            font-size: 16px;
+        .hours-tag {
+            font-size: 13px;
+            color: var(--success-color);
             font-weight: bold;
-            color: #a4d007;
         }
 
         .deal-btn {
             background: #3c2a1e;
             color: var(--deal-color);
             font-size: 12px;
-            padding: 6px 12px;
-            margin-top: 10px;
+            margin-top: 8px;
             border: 1px solid var(--deal-color);
             width: 100%;
         }
 
-        .deal-btn:hover {
-            background: #5a3d28;
+        .save-hours-btn {
+            background-color: #2e6930;
             color: #ffffff;
+            font-size: 12px;
+            width: 100%;
+            margin-top: 5px;
         }
-
-        .deal-badge {
-            background: #2b1f00;
-            color: var(--deal-color);
-            padding: 8px;
-            border-radius: 4px;
-            font-size: 13px;
-            margin-top: 10px;
-            text-align: center;
-            border: 1px solid var(--deal-color);
-        }
+        .save-hours-btn:hover { background-color: #3e8e41; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>🎮 Game Backlog & Deal Tracker</h1>
-        <p>Live Steam pricing & real-time third-party deal integration</p>
+        <h1>🎮 Game Backlog & Library Tracker</h1>
+        <p>Manage your collection, track hours, and check live deals</p>
     </header>
 
-    <div class="controls-panel">
+    <div class="tab-nav">
+        <button id="tabAll" class="tab-btn active" onclick="switchTab('ALL')">🌐 All Games</button>
+        <button id="tabLibrary" class="tab-btn" onclick="switchTab('LIBRARY')">📚 My Library</button>
+    </div>
+
+    <div class="stats-bar">
+        <div class="stat-item">
+            <div id="statTotalGames" class="stat-val">0</div>
+            <div class="stat-lbl">Games in Library</div>
+        </div>
+        <div class="stat-item">
+            <div id="statTotalHours" class="stat-val">0 hrs</div>
+            <div class="stat-lbl">Total Hours Played</div>
+        </div>
+    </div>
+
+    <div class="controls-panel" id="searchControls">
         <div class="search-group">
-            <input type="text" id="searchInput" placeholder="Search by title..." onkeyup="handleSearchKey(event)">
+            <input type="text" id="searchInput" placeholder="Search title..." onkeyup="if(event.key==='Enter') searchGames()">
             <button onclick="searchGames()">Search</button>
         </div>
-
         <div class="search-group">
             <input type="number" id="budgetInput" placeholder="Max price ($)" step="0.01">
             <button onclick="filterByBudget()">Filter Price</button>
         </div>
-
-        <button onclick="loadAllGames()">Reset All</button>
+        <button onclick="loadAllGames()">Reset</button>
     </div>
 
     <div id="gamesGrid" class="games-grid"></div>
@@ -188,30 +211,47 @@
 
 <script>
     const API_URL = '/api/games';
+    let currentTab = 'ALL';
+    let allGamesData = [];
 
-    document.addEventListener('DOMContentLoaded', loadAllGames);
+    document.addEventListener('DOMContentLoaded', () => {
+        loadAllGames();
+    });
+
+    function switchTab(tab) {
+        currentTab = tab;
+        document.getElementById('tabAll').className = tab === 'ALL' ? 'tab-btn active' : 'tab-btn';
+        document.getElementById('tabLibrary').className = tab === 'LIBRARY' ? 'tab-btn active' : 'tab-btn';
+
+        document.getElementById('searchControls').style.display = tab === 'ALL' ? 'flex' : 'none';
+        renderView();
+    }
 
     function loadAllGames() {
-        document.getElementById('searchInput').value = '';
-        document.getElementById('budgetInput').value = '';
-
         fetch(API_URL)
-            .then(response => response.json())
-            .then(games => displayGames(games))
-            .catch(err => console.error('Error fetching games:', err));
+            .then(res => res.json())
+            .then(games => {
+                allGamesData = games;
+                updateStats();
+                renderView();
+            });
+    }
+
+    function updateStats() {
+        const libraryGames = allGamesData.filter(g => g.status && g.status !== 'UNPLAYED');
+        const totalHours = libraryGames.reduce((acc, g) => acc + (g.hoursPlayed || 0), 0);
+
+        document.getElementById('statTotalGames').innerText = libraryGames.length;
+        document.getElementById('statTotalHours').innerText = `${totalHours.toFixed(1)} hrs`;
     }
 
     function searchGames() {
         const query = document.getElementById('searchInput').value.trim();
-        if (!query) { loadAllGames(); return; }
+        if (!query) return loadAllGames();
 
         fetch(`${API_URL}/search?query=${encodeURIComponent(query)}`)
-            .then(response => response.json())
+            .then(res => res.json())
             .then(games => displayGames(games));
-    }
-
-    function handleSearchKey(event) {
-        if (event.key === 'Enter') searchGames();
     }
 
     function filterByBudget() {
@@ -219,28 +259,29 @@
         if (!maxPrice) return;
 
         fetch(`${API_URL}/under?maxPrice=${maxPrice}`)
-            .then(response => response.json())
+            .then(res => res.json())
             .then(games => displayGames(games));
     }
 
-    function checkLiveDeal(gameTitle, cardId) {
-        const dealContainer = document.getElementById(`deal-${cardId}`);
-        dealContainer.innerHTML = '<span style="color:#8f98a0; font-size:12px;">Checking CheapShark API...</span>';
+    function saveGameProgress(gameId) {
+        const hours = parseFloat(document.getElementById(`hours-${gameId}`).value) || 0;
+        const status = document.getElementById(`status-${gameId}`).value;
 
-        fetch(`${API_URL}/deal?title=${encodeURIComponent(gameTitle)}`)
+        fetch(`${API_URL}/${gameId}/log-hours?hours=${hours}&status=${status}`, { method: 'PUT' })
             .then(res => res.json())
-            .then(deal => {
-                if (deal && deal.salePrice) {
-                    const savingsPct = Math.round(parseFloat(deal.savings));
-                    dealContainer.className = 'deal-badge';
-                    dealContainer.innerHTML = `🔥 Live Deal: $${deal.salePrice} (${savingsPct}% OFF!)`;
-                } else {
-                    dealContainer.innerHTML = '<span style="color:#8f98a0; font-size:12px;">No active deals found.</span>';
-                }
-            })
-            .catch(() => {
-                dealContainer.innerHTML = '<span style="color:#ff5555; font-size:12px;">No deals found.</span>';
+            .then(() => {
+                alert('✅ Saved to Library!');
+                loadAllGames();
             });
+    }
+
+    function renderView() {
+        if (currentTab === 'LIBRARY') {
+            const libraryGames = allGamesData.filter(g => g.status && g.status !== 'UNPLAYED');
+            displayGames(libraryGames);
+        } else {
+            displayGames(allGamesData);
+        }
     }
 
     function displayGames(games) {
@@ -255,22 +296,57 @@
         games.forEach(game => {
             const card = document.createElement('div');
             card.className = 'game-card';
+
+            const inLibrary = game.status && game.status !== 'UNPLAYED';
+
             card.innerHTML = `
                 <div>
                     <div class="game-title">${escapeHtml(game.title)}</div>
                     <div class="game-dev">Dev: ${escapeHtml(game.developer)}</div>
+                    <div style="font-weight:bold; color:#a4d007;">${game.price === 0 ? 'FREE' : '$' + game.price.toFixed(2)}</div>
                 </div>
-                <div class="game-details">
-                    <div class="game-price">${game.price === 0 ? 'FREE' : '$' + game.price.toFixed(2)}</div>
-                </div>
-                <div id="deal-${game.id}">
-                    <button class="deal-btn" onclick="checkLiveDeal('${escapeHtml(game.title)}', ${game.id})">
-                        🔥 Check Live CheapShark Deal
+
+                <div class="library-controls">
+                    ${inLibrary ? `<div class="hours-tag">⏱️ ${game.hoursPlayed || 0} Hours Played</div>` : ''}
+
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="number" id="hours-${game.id}" value="${game.hoursPlayed || 0}" step="0.5" min="0" style="width: 70px;" placeholder="Hrs">
+                        <select id="status-${game.id}" style="flex:1;">
+                            <option value="IN_PROGRESS" ${game.status === 'IN_PROGRESS' ? 'selected' : ''}>In Progress</option>
+                            <option value="COMPLETED" ${game.status === 'COMPLETED' ? 'selected' : ''}>Completed</option>
+                            <option value="UNPLAYED" ${!game.status || game.status === 'UNPLAYED' ? 'selected' : ''}>Not In Library</option>
+                        </select>
+                    </div>
+
+                    <button class="save-hours-btn" onclick="saveGameProgress(${game.id})">
+                        💾 Save Progress
                     </button>
+
+                    <div id="deal-${game.id}">
+                        <button class="deal-btn" onclick="checkLiveDeal('${escapeHtml(game.title)}', ${game.id})">
+                            🔥 Check CheapShark Deal
+                        </button>
+                    </div>
                 </div>
             `;
             container.appendChild(card);
         });
+    }
+
+    function checkLiveDeal(gameTitle, cardId) {
+        const dealContainer = document.getElementById(`deal-${cardId}`);
+        dealContainer.innerHTML = '<span style="color:#8f98a0; font-size:11px;">Checking deals...</span>';
+
+        fetch(`${API_URL}/deal?title=${encodeURIComponent(gameTitle)}`)
+            .then(res => res.json())
+            .then(deal => {
+                if (deal && deal.salePrice) {
+                    const savingsPct = Math.round(parseFloat(deal.savings));
+                    dealContainer.innerHTML = `<div style="color:var(--deal-color); font-size:12px; margin-top:5px;">🔥 Deal: $${deal.salePrice} (${savingsPct}% OFF)</div>`;
+                } else {
+                    dealContainer.innerHTML = '<span style="color:#8f98a0; font-size:11px;">No active deals.</span>';
+                }
+            });
     }
 
     function escapeHtml(str) {
