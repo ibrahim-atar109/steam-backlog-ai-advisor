@@ -16,6 +16,10 @@ public class Game {
     private String developer;
     private double price;
 
+    //Backlog fields
+    private String status; // "UNPLAYED", "IN_PROGRESS", "COMPLETED"
+    private double hoursPlayed;
+    private int userRating;
 
     public Game() {}
 
@@ -24,10 +28,22 @@ public class Game {
         this.title = title;
         this.developer = developer;
         this.price = price;
+        this.status = "UNPLAYED";
+        this.hoursPlayed = 0;
+        this.userRating = 0;
     }
 
     public Long getId() { return id; }
     public String getTitle() { return title; }
     public String getDeveloper() { return developer; }
     public double getPrice() { return price; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
+    public double getHoursPlayed() { return hoursPlayed; }
+    public void setHoursPlayed(double hoursPlayed) { this.hoursPlayed = hoursPlayed; }
+
+    public int getUserRating() { return userRating; }
+    public void setUserRating(int userRating) { this.userRating = userRating; }
 }

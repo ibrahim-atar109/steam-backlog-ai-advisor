@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steam Backlog & Deal Tracker</title>
+    <style>
+        :root {
+            --bg-color: #171a21;
+            --card-bg: #1b2838;
+            --accent-color: #66c0f4;
+            --text-color: #c7d5e0;
+            --text-hover: #ffffff;
+            --btn-bg: #2a475e;
+            --btn-hover: #417a9b;
+            --deal-color: #ffaa00;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 2px solid var(--btn-bg);
+            margin-bottom: 30px;
+        }
+
+        h1 { color: var(--text-hover); margin: 0 0 10px 0; }
+
+        .controls-panel {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .search-group {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+            min-width: 280px;
+        }
+
+        input[type="text"], input[type="number"] {
+            background: #101822;
+            border: 1px solid var(--btn-bg);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            width: 100%;
+            outline: none;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus {
+            border-color: var(--accent-color);
+        }
+
+        button {
+            background-color: var(--btn-bg);
+            color: var(--accent-color);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--btn-hover);
+            color: var(--text-hover);
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .game-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .game-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--text-hover);
+            margin: 0 0 8px 0;
+        }
+
+        .game-dev {
+            font-size: 13px;
+            color: #8f98a0;
+            margin-bottom: 12px;
+        }
+
+        .game-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #2a3f5a;
+        }
+
+        .game-price {
+            font-size: 16px;
+            font-weight: bold;
+            color: #a4d007;
+        }
+
+        .deal-btn {
+            background: #3c2a1e;
+            color: var(--deal-color);
+            font-size: 12px;
+            padding: 6px 12px;
+            margin-top: 10px;
+            border: 1px solid var(--deal-color);
+            width: 100%;
+        }
+
+        .deal-btn:hover {
+            background: #5a3d28;
+            color: #ffffff;
+        }
+
+        .deal-badge {
+            background: #2b1f00;
+            color: var(--deal-color);
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-top: 10px;
+            text-align: center;
+            border: 1px solid var(--deal-color);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🎮 Game Backlog & Deal Tracker</h1>
+        <p>Live Steam pricing & real-time third-party deal integration</p>
+    </header>
+
+    <div class="controls-panel">
+        <div class="search-group">
+            <input type="text" id="searchInput" placeholder="Search by title..." onkeyup="handleSearchKey(event)">
+            <button onclick="searchGames()">Search</button>
+        </div>
+
+        <div class="search-group">
+            <input type="number" id="budgetInput" placeholder="Max price ($)" step="0.01">
+            <button onclick="filterByBudget()">Filter Price</button>
+        </div>
+
+        <button onclick="loadAllGames()">Reset All</button>
+    </div>
+
+    <div id="gamesGrid" class="games-grid"></div>
+</div>
+
+<script>
+    const API_URL = '/api/games';
+
+    document.addEventListener('DOMContentLoaded', loadAllGames);
+
+    function loadAllGames() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('budgetInput').value = '';
+
+        fetch(API_URL)
+            .then(response => response.json())
+            .then(games => displayGames(games))
+            .catch(err => console.error('Error fetching games:', err));
+    }
+
+    function searchGames() {
+        const query = document.getElementById('searchInput').value.trim();
+        if (!query) { loadAllGames(); return; }
+
+        fetch(`${API_URL}/search?query=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(games => displayGames(games));
+    }
+
+    function handleSearchKey(event) {
+        if (event.key === 'Enter') searchGames();
+    }
+
+    function filterByBudget() {
+        const maxPrice = document.getElementById('budgetInput').value;
+        if (!maxPrice) return;
+
+        fetch(`${API_URL}/under?maxPrice=${maxPrice}`)
+            .then(response => response.json())
+            .then(games => displayGames(games));
+    }
+
+    function checkLiveDeal(gameTitle, cardId) {
+        const dealContainer = document.getElementById(`deal-${cardId}`);
+        dealContainer.innerHTML = '<span style="color:#8f98a0; font-size:12px;">Checking CheapShark API...</span>';
+
+        fetch(`${API_URL}/deal?title=${encodeURIComponent(gameTitle)}`)
+            .then(res => res.json())
+            .then(deal => {
+                if (deal && deal.salePrice) {
+                    const savingsPct = Math.round(parseFloat(deal.savings));
+                    dealContainer.className = 'deal-badge';
+                    dealContainer.innerHTML = `🔥 Live Deal: $${deal.salePrice} (${savingsPct}% OFF!)`;
+                } else {
+                    dealContainer.innerHTML = '<span style="color:#8f98a0; font-size:12px;">No active deals found.</span>';
+                }
+            })
+            .catch(() => {
+                dealContainer.innerHTML = '<span style="color:#ff5555; font-size:12px;">No deals found.</span>';
+            });
+    }
+
+    function displayGames(games) {
+        const container = document.getElementById('gamesGrid');
+        container.innerHTML = '';
+
+        if (games.length === 0) {
+            container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #8f98a0;">No games found.</p>';
+            return;
+        }
+
+        games.forEach(game => {
+            const card = document.createElement('div');
+            card.className = 'game-card';
+            card.innerHTML = `
+                <div>
+                    <div class="game-title">${escapeHtml(game.title)}</div>
+                    <div class="game-dev">Dev: ${escapeHtml(game.developer)}</div>
+                </div>
+                <div class="game-details">
+                    <div class="game-price">${game.price === 0 ? 'FREE' : '$' + game.price.toFixed(2)}</div>
+                </div>
+                <div id="deal-${game.id}">
+                    <button class="deal-btn" onclick="checkLiveDeal('${escapeHtml(game.title)}', ${game.id})">
+                        🔥 Check Live CheapShark Deal
+                    </button>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+</script>
+</body>
+</html>
