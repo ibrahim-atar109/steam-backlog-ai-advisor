@@ -33,6 +33,11 @@ public class GameController {
         return repository.findByTitleContainingIgnoreCase(query);
     }
 
+    @GetMapping("/status")
+    public List<Game> getGameStatus(@RequestParam String status){
+        return repository.findByStatus(status);
+    }
+
     //Live deal check using CheapShark
     @GetMapping("/deal")
     public DealDto getLiveDeal(@RequestParam String title){
