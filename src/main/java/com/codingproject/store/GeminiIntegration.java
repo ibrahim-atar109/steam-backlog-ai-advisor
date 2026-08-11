@@ -9,12 +9,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class AiService {
+public class GeminiIntegration {
 
     private final GameRepository repository;
     private final Client client;
 
-    public AiService(GameRepository repository, @Value("${gemini.api.key}") String apiKey) {
+    public GeminiIntegration(GameRepository repository, @Value("${gemini.api.key}") String apiKey) {
         this.repository = repository;
         this.client = Client.builder()
                 .apiKey(apiKey)

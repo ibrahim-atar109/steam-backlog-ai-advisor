@@ -3,6 +3,7 @@ package com.codingproject.store;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/games")
@@ -10,10 +11,12 @@ public class GameController {
 
     private final GameRepository repository;
     private final DealService dealService;
+    private final GeminiIntegration service;
 
-    public GameController(GameRepository repository, DealService dealService) {
+    public GameController(GameRepository repository, DealService dealService, GeminiIntegration service) {
         this.repository = repository;
         this.dealService = dealService;
+        this.service = service;
     }
 
     @GetMapping
@@ -21,13 +24,11 @@ public class GameController {
         return repository.findAll();
     }
 
-    //Find games with the desired price
     @GetMapping("/under")
     public List<Game> getGamesUnderBudget(@RequestParam double maxPrice){
         return repository.findByPriceLessThanEqual(maxPrice);
     }
 
-    //Search by title
     @GetMapping("/search")
     public List<Game> searchGames(@RequestParam String query){
         return repository.findByTitleContainingIgnoreCase(query);
@@ -44,7 +45,13 @@ public class GameController {
         return dealService.getBestDealForGame(title);
     }
 
-    //Update both hours played and status
+    @GetMapping("/ai-recommend")
+    public Map<String, String> getAiRec(@RequestParam String prompt){
+
+        String rec = service.getRec(prompt);
+        return Map.of("recommendation", rec);
+    }
+
     @PutMapping("/{id}/log-hours")
     public Game logHours(@PathVariable Long id, @RequestParam double hours, @RequestParam String status){
 
