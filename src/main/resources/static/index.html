@@ -6,191 +6,311 @@
     <title>Steam Backlog & Library Tracker</title>
     <style>
         :root {
-            --bg-color: #171a21;
-            --card-bg: #1b2838;
-            --accent-color: #66c0f4;
-            --text-color: #c7d5e0;
-            --text-hover: #ffffff;
-            --btn-bg: #2a475e;
-            --btn-hover: #417a9b;
-            --deal-color: #ffaa00;
-            --success-color: #a4d007;
+            --bg-main: #0a0a0c;
+            --bg-card: #141417;
+            --bg-input: #1a1a1e;
+            --border-color: #27272a;
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --accent-red: #dc2626;
+            --accent-red-hover: #ef4444;
+            --accent-red-subtle: rgba(220, 38, 38, 0.15);
+            --success-green: #22c55e;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
             margin: 0;
-            padding: 20px;
+            padding: 24px 16px;
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1040px;
             margin: 0 auto;
         }
 
         header {
             text-align: center;
-            padding: 20px 0;
-            border-bottom: 2px solid var(--btn-bg);
-            margin-bottom: 20px;
+            padding: 10px 0 24px 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 24px;
         }
 
-        h1 { color: var(--text-hover); margin: 0 0 10px 0; }
+        h1 {
+            color: var(--text-main);
+            margin: 0 0 6px 0;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
 
-        /* Navigation Tabs */
+        h1 span {
+            color: var(--accent-red);
+        }
+
+        p.subtitle {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* 🤖 AI Advisor Section */
+        .ai-box {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-left: 3px solid var(--accent-red);
+            border-radius: 6px;
+            padding: 18px;
+            margin-bottom: 24px;
+        }
+
+        .ai-box h2 {
+            color: var(--text-main);
+            margin: 0 0 12px 0;
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ai-input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .ai-response {
+            margin-top: 12px;
+            font-size: 13.5px;
+            color: #d4d4d8;
+            display: none;
+            padding: 12px;
+            background: var(--bg-input);
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            line-height: 1.5;
+        }
+
+        /* Tabs Navigation */
         .tab-nav {
             display: flex;
-            justify-content: center;
-            gap: 15px;
+            gap: 8px;
             margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
         }
 
         .tab-btn {
-            background-color: var(--card-bg);
-            color: var(--text-color);
-            border: 1px solid var(--btn-bg);
-            padding: 12px 24px;
-            border-radius: 6px;
-            font-size: 16px;
+            background-color: transparent;
+            color: var(--text-muted);
+            border: 1px solid transparent;
+            padding: 8px 18px;
+            border-radius: 5px;
+            font-size: 14px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 600;
+            transition: all 0.15s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-main);
+            background-color: var(--bg-card);
         }
 
         .tab-btn.active {
-            background-color: var(--btn-bg);
-            color: var(--accent-color);
-            border-color: var(--accent-color);
+            background-color: var(--accent-red-subtle);
+            color: var(--accent-red);
+            border-color: var(--accent-red);
         }
 
-        /* Library Stats Summary */
+        /* Stats Bar */
         .stats-bar {
-            background-color: var(--card-bg);
-            padding: 15px 20px;
-            border-radius: 8px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 14px 20px;
+            border-radius: 6px;
             display: flex;
             justify-content: space-around;
-            margin-bottom: 25px;
-            border: 1px solid #2a3f5a;
+            margin-bottom: 24px;
         }
 
         .stat-item { text-align: center; }
-        .stat-val { font-size: 22px; font-weight: bold; color: var(--accent-color); }
-        .stat-lbl { font-size: 12px; color: #8f98a0; text-transform: uppercase; }
+        .stat-val { font-size: 20px; font-weight: 700; color: var(--text-main); }
+        .stat-lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
 
+        /* Controls Panel */
         .controls-panel {
-            background-color: var(--card-bg);
-            padding: 20px;
-            border-radius: 8px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 16px;
+            border-radius: 6px;
             display: flex;
-            gap: 15px;
+            gap: 12px;
             flex-wrap: wrap;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 30px;
+            margin-bottom: 24px;
         }
 
-        .search-group { display: flex; gap: 10px; flex: 1; min-width: 250px; }
+        .search-group { display: flex; gap: 8px; flex: 1; min-width: 220px; }
 
         input, select {
-            background: #101822;
-            border: 1px solid var(--btn-bg);
-            color: white;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
             padding: 8px 12px;
             border-radius: 4px;
-            font-size: 14px;
+            font-size: 13.5px;
             outline: none;
+            transition: border-color 0.15s;
+        }
+
+        /* Hide spin buttons for Chrome, Safari, Edge, and Opera */
+        input[type=number]::-webkit-outer-spin-button,
+        input[type=number]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Hide spin buttons for Firefox */
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--accent-red);
         }
 
         button {
-            background-color: var(--btn-bg);
-            color: var(--accent-color);
+            background-color: var(--accent-red);
+            color: #ffffff;
             border: none;
-            padding: 8px 16px;
+            padding: 8px 14px;
             border-radius: 4px;
             cursor: pointer;
-            font-weight: bold;
-            transition: background 0.2s;
+            font-weight: 600;
+            font-size: 13px;
+            transition: background 0.15s ease;
         }
 
-        button:hover { background-color: var(--btn-hover); color: var(--text-hover); }
+        button:hover { background-color: var(--accent-red-hover); }
 
+        button.btn-secondary {
+            background-color: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+        }
+        button.btn-secondary:hover {
+            background-color: var(--bg-input);
+            color: var(--text-main);
+        }
+
+        /* Grid & Cards */
         .games-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-            gap: 20px;
+            gap: 16px;
         }
 
         .game-card {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 18px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            border-left: 4px solid var(--accent-color);
+            transition: border-color 0.15s ease;
         }
 
-        .game-title { font-size: 18px; font-weight: bold; color: var(--text-hover); margin-bottom: 5px; }
-        .game-dev { font-size: 13px; color: #8f98a0; margin-bottom: 15px; }
+        .game-card:hover {
+            border-color: #3f3f46;
+        }
+
+        .game-title { font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 4px; }
+        .game-dev { font-size: 12.5px; color: var(--text-muted); margin-bottom: 12px; }
+        .game-price { font-size: 14px; font-weight: 600; color: var(--success-green); }
 
         .library-controls {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #2a3f5a;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
             gap: 8px;
         }
 
         .hours-tag {
-            font-size: 13px;
-            color: var(--success-color);
-            font-weight: bold;
+            font-size: 12px;
+            color: var(--accent-red);
+            font-weight: 600;
         }
 
         .deal-btn {
-            background: #3c2a1e;
-            color: var(--deal-color);
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px dashed var(--border-color);
             font-size: 12px;
-            margin-top: 8px;
-            border: 1px solid var(--deal-color);
             width: 100%;
+            margin-top: 4px;
+        }
+        .deal-btn:hover {
+            border-color: var(--accent-red);
+            color: var(--accent-red);
+            background: transparent;
         }
 
         .save-hours-btn {
-            background-color: #2e6930;
-            color: #ffffff;
+            background-color: #27272a;
+            color: var(--text-main);
             font-size: 12px;
             width: 100%;
-            margin-top: 5px;
         }
-        .save-hours-btn:hover { background-color: #3e8e41; }
+        .save-hours-btn:hover { background-color: var(--accent-red); }
+
+        .deal-result {
+            font-size: 12px;
+            color: #f59e0b;
+            font-weight: 600;
+            margin-top: 6px;
+            text-align: center;
+        }
+
+        .text-muted { color: var(--text-muted); font-weight: normal; font-size: 11.5px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>🎮 Game Backlog & Library Tracker</h1>
-        <p>Manage your collection, track hours, and check live deals</p>
+        <h1>STEAM BACKLOG <span>& LIBRARY</span></h1>
+        <p class="subtitle">Track game progress, analyze hours, and retrieve live CheapShark deals</p>
     </header>
 
+    <div class="ai-box">
+        <h2>🤖 AI Game Advisor</h2>
+        <div class="ai-input-group">
+            <input type="text" id="aiPromptInput" placeholder="Ask for a recommendation (e.g. 'Short story RPG under $20')..." style="flex:1;" onkeyup="if(event.key==='Enter') askAiAdvisor()">
+            <button onclick="askAiAdvisor()">Ask AI</button>
+        </div>
+        <div id="aiResponseBox" class="ai-response"></div>
+    </div>
+
     <div class="tab-nav">
-        <button id="tabAll" class="tab-btn active" onclick="switchTab('ALL')">🌐 All Games</button>
-        <button id="tabLibrary" class="tab-btn" onclick="switchTab('LIBRARY')">📚 My Library</button>
+        <button id="tabAll" class="tab-btn active" onclick="switchTab('ALL')">All Games</button>
+        <button id="tabLibrary" class="tab-btn" onclick="switchTab('LIBRARY')">My Library</button>
     </div>
 
     <div class="stats-bar">
         <div class="stat-item">
             <div id="statTotalGames" class="stat-val">0</div>
-            <div class="stat-lbl">Games in Library</div>
+            <div class="stat-lbl">Library Games</div>
         </div>
         <div class="stat-item">
-            <div id="statTotalHours" class="stat-val">0 hrs</div>
-            <div class="stat-lbl">Total Hours Played</div>
+            <div id="statTotalHours" class="stat-val">0.0 hrs</div>
+            <div class="stat-lbl">Total Time Played</div>
         </div>
     </div>
 
@@ -201,9 +321,9 @@
         </div>
         <div class="search-group">
             <input type="number" id="budgetInput" placeholder="Max price ($)" step="0.01">
-            <button onclick="filterByBudget()">Filter Price</button>
+            <button onclick="filterByBudget()">Filter Budget</button>
         </div>
-        <button onclick="loadAllGames()">Reset</button>
+        <button class="btn-secondary" onclick="loadAllGames()">Reset</button>
     </div>
 
     <div id="gamesGrid" class="games-grid"></div>
@@ -217,6 +337,25 @@
     document.addEventListener('DOMContentLoaded', () => {
         loadAllGames();
     });
+
+    function askAiAdvisor() {
+        const promptInput = document.getElementById('aiPromptInput');
+        const prompt = promptInput.value.trim();
+        if (!prompt) return;
+
+        const box = document.getElementById('aiResponseBox');
+        box.style.display = 'block';
+        box.innerHTML = '<i>Analyzing library catalog...</i>';
+
+        fetch(`${API_URL}/ai-recommend?prompt=${encodeURIComponent(prompt)}`)
+            .then(res => res.json())
+            .then(data => {
+                box.innerText = data.recommendation;
+            })
+            .catch(() => {
+                box.innerText = '⚠️ Could not fetch AI recommendation at this time.';
+            });
+    }
 
     function switchTab(tab) {
         currentTab = tab;
@@ -270,7 +409,6 @@
         fetch(`${API_URL}/${gameId}/log-hours?hours=${hours}&status=${status}`, { method: 'PUT' })
             .then(res => res.json())
             .then(() => {
-                alert('✅ Saved to Library!');
                 loadAllGames();
             });
     }
@@ -289,7 +427,7 @@
         container.innerHTML = '';
 
         if (games.length === 0) {
-            container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #8f98a0;">No games found.</p>';
+            container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 30px 0;">No games matching criteria.</p>';
             return;
         }
 
@@ -302,15 +440,15 @@
             card.innerHTML = `
                 <div>
                     <div class="game-title">${escapeHtml(game.title)}</div>
-                    <div class="game-dev">Dev: ${escapeHtml(game.developer)}</div>
-                    <div style="font-weight:bold; color:#a4d007;">${game.price === 0 ? 'FREE' : '$' + game.price.toFixed(2)}</div>
+                    <div class="game-dev">${escapeHtml(game.developer)}</div>
+                    <div class="game-price">${game.price === 0 ? 'FREE' : '$' + game.price.toFixed(2)}</div>
                 </div>
 
                 <div class="library-controls">
-                    ${inLibrary ? `<div class="hours-tag">⏱️ ${game.hoursPlayed || 0} Hours Played</div>` : ''}
+                    ${inLibrary ? `<div class="hours-tag">⏱️ ${game.hoursPlayed || 0} hrs logged</div>` : ''}
 
                     <div style="display: flex; gap: 8px; align-items: center;">
-                        <input type="number" id="hours-${game.id}" value="${game.hoursPlayed || 0}" step="0.5" min="0" style="width: 70px;" placeholder="Hrs">
+                        <input type="number" id="hours-${game.id}" value="${game.hoursPlayed || 0}" step="0.5" min="0" style="width: 65px;" placeholder="Hrs">
                         <select id="status-${game.id}" style="flex:1;">
                             <option value="IN_PROGRESS" ${game.status === 'IN_PROGRESS' ? 'selected' : ''}>In Progress</option>
                             <option value="COMPLETED" ${game.status === 'COMPLETED' ? 'selected' : ''}>Completed</option>
@@ -319,12 +457,12 @@
                     </div>
 
                     <button class="save-hours-btn" onclick="saveGameProgress(${game.id})">
-                        💾 Save Progress
+                        Save Progress
                     </button>
 
                     <div id="deal-${game.id}">
                         <button class="deal-btn" onclick="checkLiveDeal('${escapeHtml(game.title)}', ${game.id})">
-                            🔥 Check CheapShark Deal
+                            Check Live Deals
                         </button>
                     </div>
                 </div>
@@ -333,19 +471,26 @@
         });
     }
 
+    // Fixed CheapShark Check with proper empty state & catch handling
     function checkLiveDeal(gameTitle, cardId) {
         const dealContainer = document.getElementById(`deal-${cardId}`);
-        dealContainer.innerHTML = '<span style="color:#8f98a0; font-size:11px;">Checking deals...</span>';
+        dealContainer.innerHTML = '<div class="deal-result text-muted">Searching CheapShark...</div>';
 
         fetch(`${API_URL}/deal?title=${encodeURIComponent(gameTitle)}`)
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error('API Response Error');
+                return res.text().then(text => text ? JSON.parse(text) : null);
+            })
             .then(deal => {
                 if (deal && deal.salePrice) {
                     const savingsPct = Math.round(parseFloat(deal.savings));
-                    dealContainer.innerHTML = `<div style="color:var(--deal-color); font-size:12px; margin-top:5px;">🔥 Deal: $${deal.salePrice} (${savingsPct}% OFF)</div>`;
+                    dealContainer.innerHTML = `<div class="deal-result">🔥 Live Deal: $${deal.salePrice} (${savingsPct}% OFF)</div>`;
                 } else {
-                    dealContainer.innerHTML = '<span style="color:#8f98a0; font-size:11px;">No active deals.</span>';
+                    dealContainer.innerHTML = '<div class="deal-result text-muted">No active deals found</div>';
                 }
+            })
+            .catch(() => {
+                dealContainer.innerHTML = '<div class="deal-result text-muted">No active deals found</div>';
             });
     }
 
