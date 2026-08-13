@@ -33,9 +33,9 @@ public class GeminiIntegration {
             String fullPrompt = "You are a gaming advisor assistant. Recommend games that are ONLY from the provided catalog below based on the user's preference.\n" +
                     "Catalog:\n" + catalogText + "\n\n" +
                     "User Request: " + prompt + "\n\n" +
-                    "Provide a friendly, concise recommendation (2-3 sentences) explaining why these games fit their request.";
+                    "Provide a concise recommendation (2-3 sentences) explaining why these games fit their request.";
 
-            // Use "gemini-flash-latest" or "gemini-2.0-flash"
+
             GenerateContentResponse response = client.models.generateContent(
                     "gemini-flash-latest",
                     fullPrompt,
@@ -47,7 +47,7 @@ public class GeminiIntegration {
             }
 
         } catch (Exception e) {
-            System.out.println("⚠️ Google Gen AI SDK Error: " + e.getMessage());
+            System.out.println("Google Gen AI Error: " + e.getMessage());
             return getLocalFallback(prompt);
         }
 
@@ -61,6 +61,6 @@ public class GeminiIntegration {
             return "Based on your store catalog, check out " + game.getTitle() +
                     " by " + game.getDeveloper() + " ($" + game.getPrice() + ")!";
         }
-        return "Unable to connect to AI Advisor at the moment. Please try searching directly in the store!";
+        return "Unable to connect to AI Advisor.";
     }
 }

@@ -56,7 +56,7 @@
             font-size: 14px;
         }
 
-        /* 🤖 AI Advisor Section */
+        /* AI Advisor */
         .ai-box {
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
@@ -174,7 +174,6 @@
             margin: 0;
         }
 
-        /* Hide spin buttons for Firefox */
         input[type=number] {
             -moz-appearance: textfield;
         }
@@ -290,7 +289,7 @@
     </header>
 
     <div class="ai-box">
-        <h2>🤖 AI Game Advisor</h2>
+        <h2> AI Game Advisor</h2>
         <div class="ai-input-group">
             <input type="text" id="aiPromptInput" placeholder="Ask for a recommendation (e.g. 'Short story RPG under $20')..." style="flex:1;" onkeyup="if(event.key==='Enter') askAiAdvisor()">
             <button onclick="askAiAdvisor()">Ask AI</button>

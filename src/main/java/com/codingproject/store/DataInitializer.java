@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -18,46 +19,42 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        InputStream is = getClass().getResourceAsStream("/games.csv");
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                getClass().getResourceAsStream("/games.csv"), StandardCharsets.UTF_8))) {
 
-        if (is == null) {
-            System.out.println("❌ ERROR: Could not find 'games.csv' in src/main/resources/");
-            return;
-        }
-
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
             String line;
-            boolean firstLine = true;
-            int count = 0;
+            boolean isHeader = true;
 
-            while ((line = br.readLine()) != null) {
-                if (firstLine) { firstLine = false; continue; } // Skip header
+            while ((line = reader.readLine()) != null) {
+                if (isHeader) {
+                    isHeader = false;
+                    continue;
+                }
 
-                String[] data = line.split(",");
+                if (line.trim().isEmpty()) continue;
 
-                if (data.length >= 3) {
-                    try {
-                        String title = data[0].trim();
+                String[] parts = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
 
-                        // Fix: Price is index 1, Developer is index 2
-                        String rawPrice = data[1].trim().replace("$", "");
-                        double price = rawPrice.equalsIgnoreCase("Free") || rawPrice.isEmpty()
-                                ? 0.0
-                                : Double.parseDouble(rawPrice);
+                if (parts.length >= 4) {
+                    String title = parts[0].replaceAll("^\"|\"$", "").trim();
 
-                        String developer = data[2].trim();
+                    String rawPrice = parts[1].replaceAll("^\"|\"$", "").replaceAll("[^0-9.]", "").trim();
+                    double price = rawPrice.isEmpty() ? 0.0 : Double.parseDouble(rawPrice);
 
-                        repository.save(new Game(title, developer, price));
-                        count++;
-                    } catch (Exception rowError) {
-                        // Skip any single broken row without breaking the whole process
-                        System.out.println("Skipped row due to parse error: " + line);
-                    }
+                    String rawAppId = parts[2].replaceAll("^\"|\"$", "").replaceAll("[^0-9]", "").trim();
+                    Long steamAppId = rawAppId.isEmpty() ? null : Long.parseLong(rawAppId);
+
+                    String developer = parts[3].replaceAll("^\"|\"$", "").trim();
+
+                    Game game = new Game(title, developer, price);
+                    game.setSteamAppId(steamAppId);
+
+                    repository.save(game);
                 }
             }
-            System.out.println("✅ Loaded " + count + " games into H2 database successfully!");
+            System.out.println("✅ Successfully loaded games");
         } catch (Exception e) {
-            System.out.println("Could not load CSV: " + e.getMessage());
+            System.out.println("Error loading CSV data: " + e.getMessage());
         }
     }
 }
