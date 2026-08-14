@@ -1,5 +1,6 @@
 package com.codingproject.store;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,11 +13,13 @@ public class GameController {
     private final GameRepository repository;
     private final DealService dealService;
     private final GeminiIntegration service;
+    private final SteamLibrary steamLibrary;
 
-    public GameController(GameRepository repository, DealService dealService, GeminiIntegration service) {
+    public GameController(GameRepository repository, DealService dealService, GeminiIntegration service, SteamLibrary steamLibrary) {
         this.repository = repository;
         this.dealService = dealService;
         this.service = service;
+        this.steamLibrary = steamLibrary;
     }
 
     @GetMapping
@@ -62,5 +65,12 @@ public class GameController {
         game.setStatus(status);
 
         return repository.save(game);
+    }
+
+    @PostMapping("/sync-user-library")
+    public ResponseEntity<String> syncUserLibrary(){
+
+        steamLibrary.syncLibrary();
+        return ResponseEntity.ok("Library synced.");
     }
 }
