@@ -377,12 +377,19 @@
     </header>
 
     <div class="ai-box">
-        <h2>🤖 AI Game Advisor</h2>
+        <h2>AI Game Advisor</h2>
         <div class="ai-input-group">
             <input type="text" id="aiPromptInput" placeholder="Ask for a recommendation (e.g. 'Short story RPG under $20')..." style="flex:1;" onkeyup="if(event.key==='Enter') askAiAdvisor()">
             <button onclick="askAiAdvisor()">Ask AI</button>
         </div>
         <div id="aiResponseBox" class="ai-response"></div>
+    </div>
+
+    <div class="controls-panel" style="margin-bottom: 16px;">
+        <div class="search-group">
+            <input type="text" id="steamIdInput" placeholder="Enter 17-digit Steam ID64..." style="flex:1;">
+            <button id="syncBtn" onclick="syncSteamLibraryWithId()">Sync Steam Profile</button>
+        </div>
     </div>
 
     <div class="tab-nav">
@@ -434,8 +441,51 @@
     let hoursChart = null;
 
     document.addEventListener('DOMContentLoaded', () => {
+        const savedSteamId = localStorage.getItem('user_steam_id');
+        if (savedSteamId) {
+            document.getElementById('steamIdInput').value = savedSteamId;
+        }
         loadAllGames();
     });
+
+    function syncSteamLibraryWithId() {
+        const steamId = document.getElementById('steamIdInput').value.trim();
+        const syncBtn = document.getElementById('syncBtn');
+
+        if (steamId) {
+            localStorage.setItem('user_steam_id', steamId);
+        }
+
+        if (syncBtn) {
+            syncBtn.innerText = 'Syncing...';
+            syncBtn.disabled = true;
+        }
+
+        const url = steamId
+            ? `${API_URL}/sync-user-library?steamId=${encodeURIComponent(steamId)}`
+            : `${API_URL}/sync-user-library`;
+
+        fetch(url, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                if (syncBtn) {
+                    syncBtn.innerText = 'Sync Steam Profile';
+                    syncBtn.disabled = false;
+                }
+
+                if (data.count === 0) {
+                    alert(data.message || 'No games found. Please check that the Steam ID is correct and that Profile/Game details are set to PUBLIC on Steam.');
+                }
+                loadAllGames();
+            })
+            .catch(() => {
+                if (syncBtn) {
+                    syncBtn.innerText = 'Sync Steam Profile';
+                    syncBtn.disabled = false;
+                }
+                alert('Failed to connect to backend server.');
+            });
+    }
 
     function askAiAdvisor() {
         const promptInput = document.getElementById('aiPromptInput');
@@ -477,8 +527,7 @@
             searchControls.style.display = tab === 'ALL' ? 'flex' : 'none';
 
             if (tab === 'LIBRARY') {
-                fetch(`${API_URL}/sync-user-library`, { method: 'POST' })
-                    .then(() => loadAllGames());
+                syncSteamLibraryWithId();
             } else {
                 renderView();
             }

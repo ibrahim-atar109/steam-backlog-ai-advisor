@@ -68,9 +68,13 @@ public class GameController {
     }
 
     @PostMapping("/sync-user-library")
-    public ResponseEntity<String> syncUserLibrary(){
+    public ResponseEntity<Map<String, Object>> syncUserLibrary(@RequestParam(required = false) String steamId){
 
-        steamLibrary.syncLibrary();
-        return ResponseEntity.ok("Library synced.");
+        int count = steamLibrary.syncLibrary(steamId);
+        return ResponseEntity.ok(Map.of(
+                "success", count > 0,
+                "count", count,
+                "message", count > 0 ? "Synced " + count + " games!" : "No games found. Ensure Steam Profile & Game details are set to PUBLIC."
+        ));
     }
 }
