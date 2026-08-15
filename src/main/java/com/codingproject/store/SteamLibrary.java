@@ -18,7 +18,7 @@ public class SteamLibrary {
     @Value("${steam.api.key}")
     private String apiKey;
 
-    @Value("${steam.user.id}")
+    @Value("${steam.user.id:}")
     private String userId;
 
     private final GameRepository repo;
@@ -29,17 +29,20 @@ public class SteamLibrary {
         this.rest = new RestTemplate();
     }
 
-    public void syncLibrary(){
+    public int syncLibrary(String customSteamId){
 
-        if(apiKey == null || apiKey.isEmpty() || userId == null || userId.isEmpty()){
+        String activeId = (customSteamId != null && !customSteamId.trim().isEmpty())
+                ? customSteamId.trim()
+                : userId;
 
+        if(apiKey == null || apiKey.isEmpty() || activeId == null || activeId.isEmpty()){
             System.out.println("API Key or User ID missing.");
-            return;
+            return 0;
         }
 
         String url = String.format(
                 "https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=%s&steamid=%s&format=json&include_appinfo=true",
-                apiKey, userId
+                apiKey, activeId
         );
 
         try{
@@ -55,22 +58,23 @@ public class SteamLibrary {
                 Map<String, Object> responseData = (Map<String, Object>) body.get("response");
                 List<Map<String, Object>> gameList = (List<Map<String, Object>>) responseData.get("games");
 
-                if(gameList == null) return;
+                if(gameList == null || gameList.isEmpty()){
+                    System.out.println("0 games found.");
+                    return 0;
+                }
 
                 for(Map<String, Object> game : gameList){
 
                     Long appId = ((Number) game.get("appid")).longValue();
                     String name = (String) game.get("name");
                     Number minutes = (Number) game.getOrDefault("playtime_forever", 0);
-                    double hours = Math.round((minutes.doubleValue() / 60) * 10.0) / 10.0;
+                    double hours = Math.round((minutes.doubleValue() / 60.0) * 10.0) / 10.0;
 
-                    //Just checking if the game exists in our H2 Database
                     Optional<Game> existingGame = repo.findAll().stream()
                             .filter(g -> g.getSteamAppId() != null && g.getSteamAppId().equals(appId))
                             .findFirst();
 
                     if(existingGame.isPresent()){
-
                         Game g = existingGame.get();
                         g.setHoursPlayed(hours);
                         if("UNPLAYED".equals(g.getStatus()) && hours > 0){
@@ -79,7 +83,6 @@ public class SteamLibrary {
                         repo.save(g);
                     }
                     else{
-
                         Game newGame = new Game(name, "Steam Import", 0.00);
                         newGame.setSteamAppId(appId);
                         newGame.setHoursPlayed(hours);
@@ -88,9 +91,11 @@ public class SteamLibrary {
                     }
                 }
                 System.out.println("Imported " + gameList.size() + " owned games from Steam.");
+                return gameList.size();
             }
         } catch (Exception e) {
             System.out.println("Couldn't sync Steam library: " + e.getMessage());
         }
+        return 0;
     }
 }
