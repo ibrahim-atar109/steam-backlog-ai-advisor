@@ -91,6 +91,20 @@
             border-radius: 4px;
             border: 1px solid var(--border-color);
             line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .typing-cursor::after {
+            content: '▋';
+            display: inline-block;
+            animation: blink 0.8s infinite;
+            margin-left: 2px;
+            color: var(--accent-red);
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
         }
 
         .tab-nav {
@@ -487,6 +501,9 @@
             });
     }
 
+    let textQueue = '';
+    let typingInterval = null;
+
     function askAiAdvisor() {
         const promptInput = document.getElementById('aiPromptInput');
         const prompt = promptInput.value.trim();
@@ -494,16 +511,45 @@
 
         const box = document.getElementById('aiResponseBox');
         box.style.display = 'block';
-        box.innerHTML = '<i>Analyzing library catalog...</i>';
+        box.innerText = 'Thinking...';
+        box.classList.add('typing-cursor');
 
-        fetch(`${API_URL}/ai-recommend?prompt=${encodeURIComponent(prompt)}`)
-            .then(res => res.json())
-            .then(data => {
-                box.innerText = data.recommendation;
-            })
-            .catch(() => {
-                box.innerText = "Couldn't fetch AI recommendation.";
-            });
+        textQueue = '';
+        let firstChunkReceived = false;
+
+        if (typingInterval) clearInterval(typingInterval);
+
+        typingInterval = setInterval(() => {
+            if (textQueue.length > 0) {
+                if (!firstChunkReceived) {
+                    box.innerText = '';
+                    firstChunkReceived = true;
+                }
+                box.innerText += textQueue.substring(0, 2);
+                textQueue = textQueue.substring(2);
+            }
+        }, 12);
+
+        const eventSource = new EventSource(`${API_URL}/ai-recommend?prompt=${encodeURIComponent(prompt)}`);
+
+        eventSource.onmessage = (event) => {
+            const parsed = JSON.parse(event.data);
+            if (parsed.text) {
+                textQueue += parsed.text;
+            }
+        };
+
+        eventSource.onerror = () => {
+            eventSource.close();
+
+            const drainCheck = setInterval(() => {
+                if (textQueue.length === 0) {
+                    clearInterval(typingInterval);
+                    clearInterval(drainCheck);
+                    box.classList.remove('typing-cursor');
+                }
+            }, 50);
+        };
     }
 
     function switchTab(tab) {
