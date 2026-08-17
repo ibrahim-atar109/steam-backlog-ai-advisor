@@ -2,6 +2,7 @@ package com.codingproject.store;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 import java.util.Map;
@@ -48,11 +49,11 @@ public class GameController {
         return dealService.getBestDealForGame(title);
     }
 
-    @GetMapping("/ai-recommend")
-    public Map<String, String> getAiRec(@RequestParam String prompt){
-
-        String rec = service.getRec(prompt);
-        return Map.of("recommendation", rec);
+    @GetMapping(value = "/ai-recommend", produces = org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter getAiRec(@RequestParam String prompt){
+        SseEmitter emitter = new SseEmitter(60000L);
+        service.getRec(prompt, emitter);
+        return emitter;
     }
 
     @PutMapping("/{id}/log-hours")

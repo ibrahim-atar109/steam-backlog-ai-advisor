@@ -63,6 +63,15 @@ public class SteamLibrary {
                     return 0;
                 }
 
+                List<Game> existingGames = repo.findAll();
+                for (Game g : existingGames) {
+                    if (g.getSteamAppId() != null) {
+                        g.setHoursPlayed(0.0);
+                        g.setStatus("UNPLAYED");
+                        repo.save(g);
+                    }
+                }
+
                 for(Map<String, Object> game : gameList){
 
                     Long appId = ((Number) game.get("appid")).longValue();
